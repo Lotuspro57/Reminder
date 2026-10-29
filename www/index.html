@@ -3,104 +3,152 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#1a1511">
+<meta name="theme-color" content="#1a1511" id="themeMeta">
 <title>Limit Bell</title>
 <style>
-:root{--bg:#1a1511;--card:#27211b;--line:#3a3128;--tx:#f3ece3;--mut:#a69a8b;--acc:#d97757;--ok:#5cb97a;--warn:#e0a84a}
+:root{--bg:#1a1511;--card:#27211b;--line:#3a3128;--tx:#f3ece3;--mut:#a69a8b;--acc:#d97757;--ok:#5cb97a;--warn:#e0a84a;--field:#1a1511;color-scheme:dark}
+:root[data-theme=light]{--bg:#f6f1ea;--card:#ffffff;--line:#e3d9ca;--tx:#2a231c;--mut:#7b6f61;--acc:#c4623f;--ok:#2f9e57;--warn:#c98a1b;--field:#f6f1ea;color-scheme:light}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Noto Sans Bengali",sans-serif;padding:calc(env(safe-area-inset-top) + 16px) 16px 40px;max-width:560px;margin-inline:auto}
-h1{font-size:20px;margin:4px 0 2px}
-.sub{color:var(--mut);font-size:13px;margin-bottom:14px}
-.bar{display:flex;gap:8px;margin-bottom:14px}
-.bar button{flex:1}
-button{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--tx);padding:9px 12px;border-radius:10px;cursor:pointer}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Noto Sans Bengali",sans-serif;padding:calc(env(safe-area-inset-top) + 12px) 12px calc(env(safe-area-inset-bottom) + 84px);max-width:560px;margin-inline:auto}
+h1{font-size:18px;margin:2px 0 10px}
+h2{font-size:13px;color:var(--mut);margin:18px 0 8px;font-weight:600;letter-spacing:.02em}
+button{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--tx);padding:7px 10px;border-radius:9px;cursor:pointer}
 button:active{transform:scale(.97)}
 button:disabled{opacity:.4}
 button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
-.card.ready{border-color:var(--ok);box-shadow:0 0 0 1px var(--ok) inset}
+input{font:inherit;color:var(--tx);background:var(--field);border:1px solid var(--line);border-radius:9px;padding:7px 9px;min-width:0}
+
+/* compact account card */
+.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:10px 12px;margin-bottom:8px}
+.card.ready{border-color:var(--ok)}
 .card.wait{border-color:var(--warn)}
-.top{display:flex;align-items:center;gap:8px}
-.name{flex:1;background:transparent;border:0;color:var(--tx);font:inherit;font-weight:600;font-size:16px;padding:2px 0;min-width:0}
-.badge{font-size:12px;padding:3px 9px;border-radius:99px;background:#333;color:var(--mut)}
-.ready .badge{background:var(--ok);color:#0b2514}
-.wait .badge{background:var(--warn);color:#2b1c00}
-.time{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;margin:8px 0 2px}
-.at{color:var(--mut);font-size:13px;min-height:18px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.chips button{padding:7px 11px;font-size:13px}
-.row{display:flex;gap:8px;margin-top:10px;align-items:center}
-.row input[type=time]{flex:1;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit}
-.row button{white-space:nowrap}
-.small{font-size:12px;color:var(--mut);line-height:1.6;margin-top:16px}
+.l1{display:flex;align-items:center;gap:8px}
+.nm{flex:1;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--line);color:var(--mut)}
+.ready .badge{background:var(--ok);color:#fff}
+.wait .badge{background:var(--warn);color:#fff}
+.l2{display:flex;align-items:baseline;gap:8px;margin:2px 0 6px}
+.tm{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+.at{flex:1;color:var(--mut);font-size:12px;text-align:right}
+.x{padding:3px 8px;font-size:13px;line-height:1;align-self:center}
+.chips{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.chips button{padding:5px 9px;font-size:12.5px}
+.chips input[type=time]{width:94px;padding:5px 6px;font-size:13px}
+
+/* bottom nav */
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding:6px 12px calc(env(safe-area-inset-bottom) + 6px);gap:8px;max-width:560px;margin-inline:auto}
+nav button{flex:1;border:0;background:transparent;padding:8px;font-size:13px;color:var(--mut)}
+nav button.on{color:var(--acc);font-weight:700}
+
+/* settings */
+.set{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:6px 12px}
+.srow{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line)}
+.srow:last-child{border-bottom:0}
+.srow label{width:70px;color:var(--mut);font-size:13px}
+.srow input{flex:1}
+.seg{display:flex;gap:6px;padding:8px 0}
+.seg button{flex:1}
+.seg button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.tone{cursor:pointer}
+.dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--mut);flex:none}
+.tone.on .dot{border-color:var(--acc);background:var(--acc);box-shadow:inset 0 0 0 3px var(--card)}
+.tone span.n{flex:1}
+.diag{font-size:13px;line-height:1.9;padding:6px 0}
+.diag b{color:var(--acc)}
+.acts{display:flex;flex-wrap:wrap;gap:6px;padding:6px 0 8px}
+.note{font-size:12px;color:var(--mut);line-height:1.6;padding:4px 2px}
 .native .webonly{display:none}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000c;color:#fff;padding:10px 16px;border-radius:99px;font-size:13px;opacity:0;pointer-events:none;transition:.25s}
+
+.toast{position:fixed;left:50%;bottom:78px;transform:translateX(-50%);background:#000d;color:#fff;padding:9px 15px;border-radius:99px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;max-width:90%;text-align:center;z-index:12}
 .toast.on{opacity:1}
-#alert{position:fixed;inset:0;background:#000d;display:none;align-items:center;justify-content:center;padding:24px;z-index:9}
+#alert{position:fixed;inset:0;background:#000d;display:none;align-items:center;justify-content:center;padding:24px;z-index:20}
 #alert.on{display:flex}
-#alert div{background:var(--card);border:2px solid var(--ok);border-radius:20px;padding:24px;text-align:center;max-width:340px;width:100%}
-#alert h2{margin:0 0 6px}
+#alert div{background:var(--card);border:2px solid var(--ok);border-radius:20px;padding:22px;text-align:center;max-width:340px;width:100%}
+#alert h2{margin:0 0 6px;font-size:18px;color:var(--tx)}
 </style>
 </head>
 <body>
-<h1>⏳ Limit Bell</h1>
-<div class="sub">লিমিট শেষ হলে সময় সেট করুন, রিসেটের সময় ফোনে অ্যালার্ট পাবেন।</div>
+<div id="view"></div>
 
-<div class="bar">
-  <button id="btnNotif" class="pri">🔔 নোটিফিকেশন চালু করুন</button>
-  <button id="btnTest">টেস্ট (৫ সেকেন্ড)</button>
-</div>
-
-<div id="list"></div>
-
-<div class="small" id="help"></div>
+<nav>
+  <button data-tab="acc" class="on">⏳ অ্যাকাউন্ট</button>
+  <button data-tab="set">⚙️ সেটিংস</button>
+</nav>
 
 <div id="alert"><div><h2>✅ লিমিট রিসেট হয়েছে</h2><p id="aP"></p><button class="pri" id="aOk">ঠিক আছে</button></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
-const KEY='limitReminderV1';
+const KEY='limitReminderV1', SKEY='limitBellSettings';
 const CAP=window.Capacitor;
 const native=!!(CAP&&CAP.isNativePlatform&&CAP.isNativePlatform());
-const LN=native&&CAP.Plugins?CAP.Plugins.LocalNotifications:null;
+let LN=null;
+if(native){try{LN=(CAP.Plugins&&CAP.Plugins.LocalNotifications)||CAP.registerPlugin('LocalNotifications')}catch(e){}}
+let SO=null;
+if(native){try{SO=CAP.registerPlugin('SettingsOpener')}catch(e){}}
 if(native)document.body.classList.add('native');
 
+const TONES=[
+  {id:'default',n:'ডিফল্ট (সিস্টেম)'},
+  {id:'chime',n:'Chime'},
+  {id:'bell',n:'Bell'},
+  {id:'beep',n:'Beep'},
+  {id:'alarm',n:'Alarm (জোরালো)'}
+];
+
+/* ---------- state ---------- */
 const defaults=()=>[1,2,3,4].map(i=>({id:i,name:'Account '+i,resetAt:null,notified:true}));
-let S;
-try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+let S;try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!Array.isArray(S)||S.length!==4)S=defaults();
+let ST={theme:'dark',tone:'default'};
+try{Object.assign(ST,JSON.parse(localStorage.getItem(SKEY))||{})}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const saveSt=()=>{try{localStorage.setItem(SKEY,JSON.stringify(ST))}catch(e){}};
 
 const $=s=>document.querySelector(s);
 const pad=n=>String(n).padStart(2,'0');
-function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2400)}
+const esc=s=>s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),2800)}
 const fmtAt=ms=>new Date(ms).toLocaleString('bn-BD',{weekday:'short',hour:'numeric',minute:'2-digit',hour12:true});
 function fmtLeft(ms){const s=Math.max(0,Math.ceil(ms/1000));return pad(Math.floor(s/3600))+':'+pad(Math.floor(s%3600/60))+':'+pad(s%60)}
+const channel=()=>'limit_'+ST.tone;
 
-$('#help').innerHTML=native
-  ? '<b>টিপস:</b> প্রথমবার নোটিফিকেশন ও "Alarms &amp; reminders" পারমিশন দিন। ব্যাটারি সেটিংসে অ্যাপটিকে "Unrestricted" রাখলে সবচেয়ে নির্ভরযোগ্য হয়।'
-  : '<b>ওয়েব ভার্সন:</b> অ্যাপ বন্ধ থাকলে নোটিফিকেশন নাও আসতে পারে। নিশ্চিত থাকতে "📅 ক্যালেন্ডারে" ব্যবহার করুন, অথবা APK ইনস্টল করুন।';
+/* ---------- theme ---------- */
+function applyTheme(){
+  const dark=ST.theme==='dark'||(ST.theme==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.dataset.theme=dark?'dark':'light';
+  $('#themeMeta').content=dark?'#1a1511':'#f6f1ea';
+}
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme)}catch(e){}
 
-/* ---------- native (Capacitor) ---------- */
+/* ---------- native notifications ---------- */
+let askedExact=false;
 async function nativeInit(){
   if(!LN)return;
-  try{await LN.createChannel({id:'limit',name:'Limit reset',description:'Claude limit reset alerts',importance:5,visibility:1,vibration:true})}catch(e){}
+  for(const t of TONES){
+    const o={id:'limit_'+t.id,name:'Limit reset - '+t.n,description:'Claude limit reset alerts',importance:5,visibility:1,vibration:true};
+    if(t.id!=='default')o.sound=t.id+'.wav';
+    try{await LN.createChannel(o)}catch(e){}
+  }
 }
-async function nativePerms(){
-  if(!LN)return false;
-  let ok=false;
+async function ensureReady(){
+  if(!LN){toast('নেটিভ প্লাগইন পাওয়া যায়নি');return false}
   try{
     let p=await LN.checkPermissions();
     if(p.display!=='granted')p=await LN.requestPermissions();
-    ok=p.display==='granted';
-  }catch(e){}
+    if(p.display!=='granted'){toast('নোটিফিকেশন পারমিশন দেওয়া হয়নি');return false}
+  }catch(e){toast('পারমিশন এরর: '+(e.message||e));return false}
   try{
     const ex=await LN.checkExactNotificationSetting();
-    if(ex.exact_alarm!=='granted')await LN.changeExactNotificationSetting();
+    if(ex.exact_alarm!=='granted'&&!askedExact){
+      askedExact=true;toast('"Alarms & reminders" চালু করে ফিরে আসুন');
+      await LN.changeExactNotificationSetting();
+    }
   }catch(e){}
-  return ok;
+  return true;
 }
-async function nativeSchedule(a){
+async function pendingCount(){try{return (await LN.getPending()).notifications.length}catch(e){return -1}}
+async function nativeSchedule(a,quiet){
   if(!LN)return;
   try{
     await LN.cancel({notifications:[{id:a.id}]});
@@ -109,58 +157,150 @@ async function nativeSchedule(a){
       title:'✅ '+a.name+' রেডি',
       body:'লিমিট রিসেট হয়েছে। কাজ আবার শুরু করুন।',
       schedule:{at:new Date(a.resetAt),allowWhileIdle:true},
-      channelId:'limit'
+      channelId:channel()
     }]});
-  }catch(e){toast('শিডিউল করতে সমস্যা: '+(e.message||e))}
+    if(!quiet){const n=await pendingCount();toast(a.name+': '+fmtAt(a.resetAt)+' এ অ্যালার্ট ✓ (শিডিউল: '+n+')')}
+  }catch(e){toast('শিডিউল এরর: '+(e.message||e))}
 }
-async function nativeCancel(id){
-  if(!LN)return;
-  try{await LN.cancel({notifications:[{id}]})}catch(e){}
+async function nativeCancel(id){if(LN){try{await LN.cancel({notifications:[{id}]})}catch(e){}}}
+function rescheduleAll(){
+  if(!native)return;
+  S.forEach(a=>{if(a.resetAt&&a.resetAt>Date.now())nativeSchedule(a,true)});
 }
 
 /* ---------- web fallback ---------- */
 let swReg=null;
 if(!native&&'serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').then(r=>swReg=r).catch(()=>{})}
-
-/* ---------- UI ---------- */
-function render(){
-  const el=$('#list');el.innerHTML='';
-  S.forEach((a,i)=>{
-    const now=Date.now();
-    const waiting=a.resetAt&&a.resetAt>now;
-    const ready=a.resetAt&&a.resetAt<=now;
-    const c=document.createElement('div');
-    c.className='card '+(waiting?'wait':ready?'ready':'');
-    c.innerHTML=`
-      <div class="top">
-        <input class="name" value="${a.name.replace(/"/g,'&quot;')}" data-i="${i}" aria-label="অ্যাকাউন্টের নাম">
-        <span class="badge">${waiting?'অপেক্ষা':ready?'রেডি ✅':'ফ্রি'}</span>
-      </div>
-      <div class="time" data-t="${i}">${waiting?fmtLeft(a.resetAt-now):ready?'00:00:00':'--:--:--'}</div>
-      <div class="at">${a.resetAt?(waiting?'রিসেট: ':'রিসেট হয়েছিল: ')+fmtAt(a.resetAt):'লিমিট শেষ হলে নিচে সময় দিন'}</div>
-      <div class="chips">
-        ${[1,2,3,4,5].map(h=>`<button data-h="${h}" data-i="${i}">${h} ঘণ্টা</button>`).join('')}
-      </div>
-      <div class="row">
-        <input type="time" id="tm${i}" aria-label="রিসেটের সময়">
-        <button data-set="${i}" class="pri">সেট</button>
-      </div>
-      <div class="row">
-        <button data-cal="${i}" class="webonly" style="flex:1" ${waiting?'':'disabled'}>📅 ক্যালেন্ডারে</button>
-        <button data-clr="${i}" style="flex:1">মুছুন</button>
-      </div>`;
-    el.appendChild(c);
-  });
+async function webNotify(title,body){
+  if('Notification' in window&&Notification.permission==='granted'){
+    const opt={body,icon:'icon.svg',tag:'limit-'+title,requireInteraction:true,vibrate:[300,150,300]};
+    try{const r=swReg||await navigator.serviceWorker?.ready;if(r)await r.showNotification(title,opt);else new Notification(title,opt)}catch(e){}
+  }
 }
 
+/* ---------- sound ---------- */
+function beep(){
+  try{const c=new (window.AudioContext||window.webkitAudioContext)();
+    [0,.3,.6].forEach(t=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=880;o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(.2,c.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+t+.25);o.start(c.currentTime+t);o.stop(c.currentTime+t+.25)});
+  }catch(e){}
+}
+function playTone(id){
+  if(id==='default'){beep();return}
+  try{const a=new Audio('sounds/'+id+'.wav');a.play().catch(beep)}catch(e){beep()}
+}
+function inAppAlert(body){
+  try{navigator.vibrate&&navigator.vibrate([300,150,300,150,300])}catch(e){}
+  playTone(ST.tone);
+  $('#aP').textContent=body;$('#alert').classList.add('on');
+}
+$('#aOk').onclick=()=>$('#alert').classList.remove('on');
+
+/* ---------- views ---------- */
+let tab='acc';
+function render(){
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  tab==='acc'?renderAcc():renderSet();
+}
+
+function renderAcc(){
+  const now=Date.now();
+  $('#view').innerHTML='<h1>⏳ Limit Bell</h1>'+S.map((a,i)=>{
+    const waiting=a.resetAt&&a.resetAt>now, ready=a.resetAt&&a.resetAt<=now;
+    return `<div class="card ${waiting?'wait':ready?'ready':''}">
+      <div class="l1"><span class="nm">${esc(a.name)}</span><span class="badge">${waiting?'অপেক্ষা':ready?'রেডি ✅':'ফ্রি'}</span></div>
+      <div class="l2">
+        <span class="tm" data-t="${i}">${waiting?fmtLeft(a.resetAt-now):ready?'00:00:00':'--:--:--'}</span>
+        <span class="at">${a.resetAt?(waiting?'রিসেট: ':'হয়েছিল: ')+fmtAt(a.resetAt):'লিমিট শেষ হলে সময় দিন'}</span>
+        <button class="webonly x" data-cal="${i}" ${waiting?'':'disabled'} title="ক্যালেন্ডার">📅</button>
+        <button class="x" data-clr="${i}" ${a.resetAt?'':'disabled'} title="মুছুন">✕</button>
+      </div>
+      <div class="chips">
+        ${[1,2,3,4,5].map(h=>`<button data-h="${h}" data-i="${i}">${h}h</button>`).join('')}
+        <input type="time" id="tm${i}" aria-label="রিসেটের সময়">
+        <button class="pri" data-set="${i}">সেট</button>
+      </div>
+    </div>`}).join('');
+}
+
+function renderSet(){
+  $('#view').innerHTML=`<h1>⚙️ সেটিংস</h1>
+  <h2>অ্যাকাউন্টের নাম</h2>
+  <div class="set">${S.map((a,i)=>`<div class="srow"><label>#${i+1}</label><input class="accname" data-i="${i}" value="${esc(a.name)}" maxlength="24"></div>`).join('')}</div>
+
+  <h2>থিম</h2>
+  <div class="set"><div class="seg">
+    ${[['dark','🌙 ডার্ক'],['light','☀️ লাইট'],['system','📱 সিস্টেম']].map(([k,l])=>`<button data-theme="${k}" class="${ST.theme===k?'on':''}">${l}</button>`).join('')}
+  </div></div>
+
+  <h2>অ্যালার্ম টোন</h2>
+  <div class="set">${TONES.map(t=>`<div class="srow tone ${ST.tone===t.id?'on':''}" data-tone="${t.id}"><span class="dot"></span><span class="n">${t.n}</span><button data-prev="${t.id}">▶</button></div>`).join('')}</div>
+  <div class="note">টোন বদলালে আগের সেট করা অ্যালার্মগুলোও নতুন টোনে আবার শিডিউল হয়।${native?'':' (টোন শুধু APK অ্যাপে কাজ করে)'}</div>
+
+  <h2>নোটিফিকেশন স্ট্যাটাস</h2>
+  <div class="set">
+    <div class="diag" id="diag">${native?'লোড হচ্ছে…':'ওয়েব ভার্সন: নেটিভ স্ট্যাটাস নেই'}</div>
+    <div class="acts">
+      <button class="pri" id="bPerm">🔔 পারমিশন দিন</button>
+      <button id="bTest5">টেস্ট ৫ সেকেন্ড</button>
+      <button id="bTest30">বন্ধ অ্যাপ টেস্ট (৩০ সেঃ)</button>
+      <button id="bRef">রিফ্রেশ</button>
+    </div>
+  </div>
+  <div class="note">
+    <b>বন্ধ অ্যাপে অ্যালার্ম না এলে:</b> ফোন সেটিংস → Apps → Limit Bell → Battery → <b>Unrestricted</b> করুন, এবং "Alarms &amp; reminders" চালু রাখুন। Xiaomi/Oppo/Vivo/Realme ফোনে "Autostart" ও চালু করুন, আর recent apps-এ অ্যাপটি লক (🔒) করে রাখুন। অ্যাপ "Force stop" করলে অ্যান্ড্রয়েড সব অ্যালার্ম মুছে ফেলে।
+  </div>
+
+  <h2>ফোন সেটিংস খুলুন</h2>
+  <div class="set">
+    <div class="srow"><span class="n" style="flex:1">🔔 নোটিফিকেশন চালু/বন্ধ ও সাউন্ড</span><button data-open="notif">খুলুন</button></div>
+    <div class="srow"><span class="n" style="flex:1">⏰ Alarms &amp; reminders (Android 12+)</span><button data-open="exact">খুলুন</button></div>
+    <div class="srow"><span class="n" style="flex:1">🔋 ব্যাকগ্রাউন্ডে চলতে দিন (ব্যাটারি)</span><button data-open="battery">খুলুন</button></div>
+    <div class="srow"><span class="n" style="flex:1">🚀 Autostart (Xiaomi/Oppo/Vivo)</span><button data-open="autostart">খুলুন</button></div>
+    <div class="srow"><span class="n" style="flex:1">ℹ️ অ্যাপ ইনফো</span><button data-open="app">খুলুন</button></div>
+  </div>
+  <div class="note">${native?'সেটিংস পেজ থেকে ফিরে এলে উপরের স্ট্যাটাস নিজে আপডেট হবে।':'এই বাটনগুলো শুধু APK অ্যাপে কাজ করে।'}</div>
+
+  <h2>ডেটা</h2>
+  <div class="acts"><button id="bReset">সব অ্যালার্ম মুছুন</button></div>`;
+  if(native)refreshDiag();
+}
+
+async function refreshDiag(){
+  const el=$('#diag');if(!el||!LN)return;
+  let p='?',ex='?',n='?';
+  try{p=(await LN.checkPermissions()).display}catch(e){}
+  try{ex=(await LN.checkExactNotificationSetting()).exact_alarm}catch(e){}
+  n=await pendingCount();
+  let bat='?';
+  try{if(SO)bat=(await SO.status()).batteryUnrestricted?'✅ অনুমতি আছে':'❌ সীমাবদ্ধ'}catch(e){}
+  const ok=v=>v==='granted'?'✅ চালু':'❌ '+v;
+  el.innerHTML=`নোটিফিকেশন: <b>${ok(p)}</b><br>Alarms &amp; reminders: <b>${ok(ex)}</b><br>ব্যাকগ্রাউন্ড (ব্যাটারি): <b>${bat}</b><br>শিডিউল করা অ্যালার্ম: <b>${n}</b>`;
+}
+
+async function openSet(t){
+  if(!SO){toast('এটা শুধু APK অ্যাপে কাজ করে (নতুন APK ইনস্টল করুন)');return}
+  try{
+    const r=await SO.open({target:t});
+    if(!r.opened)toast('এই ফোনে সেটিংস খোলা যায়নি, ম্যানুয়ালি খুলুন');
+    else if(!r.direct)toast(t==='exact'?'এই ফোনে আলাদা অনুমতি লাগে না, অ্যাপ ইনফো খুলছি':'এই ফোনে সরাসরি পেজ নেই, অ্যাপ ইনফো খুলছি');
+  }catch(e){toast('এরর: '+(e.message||e))}
+}
+
+/* ---------- actions ---------- */
 async function setReset(i,ms){
   S[i].resetAt=ms;S[i].notified=false;save();render();
-  toast(S[i].name+': '+fmtAt(ms)+' এ অ্যালার্ট');
-  if(native){await nativeSchedule(S[i])}
+  if(native){const ok=await ensureReady();if(ok)await nativeSchedule(S[i])}
+  else toast(S[i].name+': '+fmtAt(ms)+' এ অ্যালার্ট');
 }
 
-document.addEventListener('click',e=>{
-  const b=e.target.closest('button');if(!b)return;
+document.addEventListener('click',async e=>{
+  const nav=e.target.closest('nav button');
+  if(nav){tab=nav.dataset.tab;render();return}
+  const tr=e.target.closest('.tone');
+  const b=e.target.closest('button');
+  if(b&&b.dataset.prev){playTone(b.dataset.prev);return}
+  if(tr&&!b){ST.tone=tr.dataset.tone;saveSt();render();rescheduleAll();return}
+  if(!b)return;
   const d=b.dataset;
   if(d.h){setReset(+d.i,Date.now()+d.h*3600e3)}
   else if(d.set!==undefined){
@@ -170,17 +310,35 @@ document.addEventListener('click',e=>{
     if(t.getTime()<=Date.now())t.setDate(t.getDate()+1);
     setReset(i,t.getTime());
   }
-  else if(d.clr!==undefined){
-    const i=+d.clr;S[i].resetAt=null;S[i].notified=true;save();render();
-    if(native)nativeCancel(S[i].id);
-  }
+  else if(d.clr!==undefined){const i=+d.clr;S[i].resetAt=null;S[i].notified=true;save();render();if(native)nativeCancel(S[i].id)}
   else if(d.cal!==undefined){exportIcs(+d.cal)}
+  else if(d.theme){ST.theme=d.theme;saveSt();applyTheme();render()}
+  else if(d.open){openSet(d.open)}
+  else if(b.id==='bPerm'){
+    if(native){await ensureReady();refreshDiag()}
+    else if('Notification' in window){const p=await Notification.requestPermission();toast(p==='granted'?'চালু হয়েছে ✅':'পারমিশন দেওয়া হয়নি')}
+  }
+  else if(b.id==='bRef'){refreshDiag()}
+  else if(b.id==='bTest5'||b.id==='bTest30'){
+    const sec=b.id==='bTest5'?5:30;
+    if(!native){inAppAlert('এভাবেই লিমিট রিসেটের অ্যালার্ট আসবে।');webNotify('টেস্ট অ্যালার্ট','টেস্ট');return}
+    if(!(await ensureReady()))return;
+    try{
+      await LN.schedule({notifications:[{id:90+sec%7,title:'টেস্ট অ্যালার্ট',body:'এভাবেই লিমিট রিসেটের অ্যালার্ট আসবে।',schedule:{at:new Date(Date.now()+sec*1000),allowWhileIdle:true},channelId:channel()}]});
+      toast(sec===5?'৫ সেকেন্ডে নোটিফিকেশন আসবে':'এখন অ্যাপ recent থেকে সরিয়ে ৩০ সেকেন্ড অপেক্ষা করুন');
+      setTimeout(refreshDiag,800);
+    }catch(err){toast('এরর: '+(err.message||err))}
+  }
+  else if(b.id==='bReset'){
+    if(!confirm('সব অ্যালার্ম মুছে ফেলবেন?'))return;
+    S.forEach(a=>{a.resetAt=null;a.notified=true;nativeCancel(a.id)});save();toast('মুছে ফেলা হয়েছে');
+  }
 });
 document.addEventListener('change',e=>{
-  if(e.target.classList.contains('name')){
+  if(e.target.classList.contains('accname')){
     const i=+e.target.dataset.i;
-    S[i].name=e.target.value.trim()||('Account '+(i+1));save();
-    if(native&&S[i].resetAt&&S[i].resetAt>Date.now())nativeSchedule(S[i]);
+    S[i].name=e.target.value.trim()||('Account '+(i+1));e.target.value=S[i].name;save();
+    if(native&&S[i].resetAt&&S[i].resetAt>Date.now())nativeSchedule(S[i],true);
   }
 });
 
@@ -198,49 +356,6 @@ function exportIcs(i){
   setTimeout(()=>URL.revokeObjectURL(url),5000);
 }
 
-function beep(){
-  try{const c=new (window.AudioContext||window.webkitAudioContext)();
-    [0,.3,.6].forEach(t=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=880;o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(.2,c.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+t+.25);o.start(c.currentTime+t);o.stop(c.currentTime+t+.25)});
-  }catch(e){}
-}
-function inAppAlert(body){
-  try{navigator.vibrate&&navigator.vibrate([300,150,300,150,300])}catch(e){}
-  beep();
-  $('#aP').textContent=body;$('#alert').classList.add('on');
-}
-async function webNotify(title,body){
-  if('Notification' in window&&Notification.permission==='granted'){
-    const opt={body,icon:'icon.svg',tag:'limit-'+title,requireInteraction:true,vibrate:[300,150,300]};
-    try{
-      const r=swReg||await navigator.serviceWorker?.ready;
-      if(r)await r.showNotification(title,opt);else new Notification(title,opt);
-    }catch(e){}
-  }
-}
-$('#aOk').onclick=()=>$('#alert').classList.remove('on');
-
-$('#btnNotif').onclick=async()=>{
-  if(native){const ok=await nativePerms();toast(ok?'নোটিফিকেশন চালু হয়েছে ✅':'পারমিশন দেওয়া হয়নি');refreshBtn();return}
-  if(!('Notification' in window)){toast('এই ব্রাউজারে নোটিফিকেশন সাপোর্ট নেই');return}
-  const p=await Notification.requestPermission();
-  toast(p==='granted'?'নোটিফিকেশন চালু হয়েছে ✅':'পারমিশন দেওয়া হয়নি');refreshBtn();
-};
-async function refreshBtn(){
-  const b=$('#btnNotif');let ok=false;
-  if(native&&LN){try{ok=(await LN.checkPermissions()).display==='granted'}catch(e){}}
-  else ok='Notification' in window&&Notification.permission==='granted';
-  if(ok){b.textContent='🔔 নোটিফিকেশন চালু';b.classList.remove('pri')}
-}
-$('#btnTest').onclick=async()=>{
-  if(native&&LN){
-    await nativePerms();
-    try{
-      await LN.schedule({notifications:[{id:99,title:'টেস্ট অ্যালার্ট',body:'এভাবেই লিমিট রিসেটের অ্যালার্ট আসবে।',schedule:{at:new Date(Date.now()+5000),allowWhileIdle:true},channelId:'limit'}]});
-      toast('৫ সেকেন্ডের মধ্যে নোটিফিকেশন আসবে');
-    }catch(e){toast('সমস্যা: '+(e.message||e))}
-  }else{inAppAlert('এভাবেই লিমিট রিসেটের অ্যালার্ট আসবে।');webNotify('টেস্ট অ্যালার্ট','এভাবেই লিমিট রিসেটের অ্যালার্ট আসবে।')}
-};
-
 function tick(){
   const now=Date.now();let changed=false;
   S.forEach((a,i)=>{
@@ -252,18 +367,15 @@ function tick(){
     const t=document.querySelector('[data-t="'+i+'"]');
     if(t&&a.resetAt&&a.resetAt>now)t.textContent=fmtLeft(a.resetAt-now);
   });
-  if(changed)render();
+  if(changed&&tab==='acc')renderAcc();
 }
 setInterval(tick,1000);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden){render();tick()}});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(tab==='acc')renderAcc();else if(native)refreshDiag();tick()}});
 
 (async()=>{
-  render();
-  if(native){await nativeInit();await nativePerms();
-    // re-sync pending alarms in case the system cleared them
-    S.forEach(a=>{if(a.resetAt&&a.resetAt>Date.now())nativeSchedule(a)});
-  }
-  refreshBtn();tick();
+  applyTheme();render();
+  if(native){await nativeInit();rescheduleAll()}
+  tick();
 })();
 </script>
 </body>
