@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1a1511">
+<title>Limit Bell</title>
+<style>
+:root{--bg:#1a1511;--card:#27211b;--line:#3a3128;--tx:#f3ece3;--mut:#a69a8b;--acc:#d97757;--ok:#5cb97a;--warn:#e0a84a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Noto Sans Bengali",sans-serif;padding:calc(env(safe-area-inset-top) + 16px) 16px 40px;max-width:560px;margin-inline:auto}
+h1{font-size:20px;margin:4px 0 2px}
+.sub{color:var(--mut);font-size:13px;margin-bottom:14px}
+.bar{display:flex;gap:8px;margin-bottom:14px}
+.bar button{flex:1}
+button{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--tx);padding:9px 12px;border-radius:10px;cursor:pointer}
+button:active{transform:scale(.97)}
+button:disabled{opacity:.4}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.card.ready{border-color:var(--ok);box-shadow:0 0 0 1px var(--ok) inset}
+.card.wait{border-color:var(--warn)}
+.top{display:flex;align-items:center;gap:8px}
+.name{flex:1;background:transparent;border:0;color:var(--tx);font:inherit;font-weight:600;font-size:16px;padding:2px 0;min-width:0}
+.badge{font-size:12px;padding:3px 9px;border-radius:99px;background:#333;color:var(--mut)}
+.ready .badge{background:var(--ok);color:#0b2514}
+.wait .badge{background:var(--warn);color:#2b1c00}
+.time{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;margin:8px 0 2px}
+.at{color:var(--mut);font-size:13px;min-height:18px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chips button{padding:7px 11px;font-size:13px}
+.row{display:flex;gap:8px;margin-top:10px;align-items:center}
+.row input[type=time]{flex:1;background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit}
+.row button{white-space:nowrap}
+.small{font-size:12px;color:var(--mut);line-height:1.6;margin-top:16px}
+.native .webonly{display:none}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000c;color:#fff;padding:10px 16px;border-radius:99px;font-size:13px;opacity:0;pointer-events:none;transition:.25s}
+.toast.on{opacity:1}
+#alert{position:fixed;inset:0;background:#000d;display:none;align-items:center;justify-content:center;padding:24px;z-index:9}
+#alert.on{display:flex}
+#alert div{background:var(--card);border:2px solid var(--ok);border-radius:20px;padding:24px;text-align:center;max-width:340px;width:100%}
+#alert h2{margin:0 0 6px}
+</style>
+</head>
+<body>
+<h1>⏳ Limit Bell</h1>
+<div class="sub">লিমিট শেষ হলে সময় সেট করুন, রিসেটের সময় ফোনে অ্যালার্ট পাবেন।</div>
+
+<div class="bar">
+  <button id="btnNotif" class="pri">🔔 নোটিফিকেশন চালু করুন</button>
+  <button id="btnTest">টেস্ট (৫ সেকেন্ড)</button>
+</div>
+
+<div id="list"></div>
+
+<div class="small" id="help"></div>
+
+<div id="alert"><div><h2>✅ লিমিট রিসেট হয়েছে</h2><p id="aP"></p><button class="pri" id="aOk">ঠিক আছে</button></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY='limitReminderV1';
+const CAP=window.Capacitor;
+const native=!!(CAP&&CAP.isNativePlatform&&CAP.isNativePlatform());
+const LN=native&&CAP.Plugins?CAP.Plugins.LocalNotifications:null;
+if(native)document.body.classList.add('native');
+
+const defaults=()=>[1,2,3,4].map(i=>({id:i,name:'Account '+i,resetAt:null,notified:true}));
+let S;
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!Array.isArray(S)||S.length!==4)S=defaults();
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+
+const $=s=>document.querySelector(s);
+const pad=n=>String(n).padStart(2,'0');
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2400)}
+const fmtAt=ms=>new Date(ms).toLocaleString('bn-BD',{weekday:'short',hour:'numeric',minute:'2-digit',hour12:true});
+function fmtLeft(ms){const s=Math.max(0,Math.ceil(ms/1000));return pad(Math.floor(s/3600))+':'+pad(Math.floor(s%3600/60))+':'+pad(s%60)}
+
+$('#help').innerHTML=native
+  ? '<b>টিপস:</b> প্রথমবার নোটিফিকেশন ও "Alarms &amp; reminders" পারমিশন দিন। ব্যাটারি সেটিংসে অ্যাপটিকে "Unrestricted" রাখলে সবচেয়ে নির্ভরযোগ্য হয়।'
+  : '<b>ওয়েব ভার্সন:</b> অ্যাপ বন্ধ থাকলে নোটিফিকেশন নাও আসতে পারে। নিশ্চিত থাকতে "📅 ক্যালেন্ডারে" ব্যবহার করুন, অথবা APK ইনস্টল করুন।';
+
+/* ---------- native (Capacitor) ---------- */
+async function nativeInit(){
+  if(!LN)return;
+  try{await LN.createChannel({id:'limit',name:'Limit reset',description:'Claude limit reset alerts',importance:5,visibility:1,vibration:true})}catch(e){}
+}
+async function nativePerms(){
+  if(!LN)return false;
+  let ok=false;
+  try{
+    let p=await LN.checkPermissions();
+    if(p.display!=='granted')p=await LN.requestPermissions();
+    ok=p.display==='granted';
+  }catch(e){}
+  try{
+    const ex=await LN.checkExactNotificationSetting();
+    if(ex.exact_alarm!=='granted')await LN.changeExactNotificationSetting();
+  }catch(e){}
+  return ok;
+}
+async function nativeSchedule(a){
+  if(!LN)return;
+  try{
+    await LN.cancel({notifications:[{id:a.id}]});
+    await LN.schedule({notifications:[{
+      id:a.id,
+      title:'✅ '+a.name+' রেডি',
+      body:'লিমিট রিসেট হয়েছে। কাজ আবার শুরু করুন।',
+      schedule:{at:new Date(a.resetAt),allowWhileIdle:true},
+      channelId:'limit'
+    }]});
+  }catch(e){toast('শিডিউল করতে সমস্যা: '+(e.message||e))}
+}
+async function nativeCancel(id){
+  if(!LN)return;
+  try{await LN.cancel({notifications:[{id}]})}catch(e){}
+}
+
+/* ---------- web fallback ---------- */
+let swReg=null;
+if(!native&&'serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').then(r=>swReg=r).catch(()=>{})}
+
+/* ---------- UI ---------- */
+function render(){
+  const el=$('#list');el.innerHTML='';
+  S.forEach((a,i)=>{
+    const now=Date.now();
+    const waiting=a.resetAt&&a.resetAt>now;
+    const ready=a.resetAt&&a.resetAt<=now;
+    const c=document.createElement('div');
+    c.className='card '+(waiting?'wait':ready?'ready':'');
+    c.innerHTML=`
+      <div class="top">
+        <input class="name" value="${a.name.replace(/"/g,'&quot;')}" data-i="${i}" aria-label="অ্যাকাউন্টের নাম">
+        <span class="badge">${waiting?'অপেক্ষা':ready?'রেডি ✅':'ফ্রি'}</span>
+      </div>
+      <div class="time" data-t="${i}">${waiting?fmtLeft(a.resetAt-now):ready?'00:00:00':'--:--:--'}</div>
+      <div class="at">${a.resetAt?(waiting?'রিসেট: ':'রিসেট হয়েছিল: ')+fmtAt(a.resetAt):'লিমিট শেষ হলে নিচে সময় দিন'}</div>
+      <div class="chips">
+        ${[1,2,3,4,5].map(h=>`<button data-h="${h}" data-i="${i}">${h} ঘণ্টা</button>`).join('')}
+      </div>
+      <div class="row">
+        <input type="time" id="tm${i}" aria-label="রিসেটের সময়">
+        <button data-set="${i}" class="pri">সেট</button>
+      </div>
+      <div class="row">
+        <button data-cal="${i}" class="webonly" style="flex:1" ${waiting?'':'disabled'}>📅 ক্যালেন্ডারে</button>
+        <button data-clr="${i}" style="flex:1">মুছুন</button>
+      </div>`;
+    el.appendChild(c);
+  });
+}
+
+async function setReset(i,ms){
+  S[i].resetAt=ms;S[i].notified=false;save();render();
+  toast(S[i].name+': '+fmtAt(ms)+' এ অ্যালার্ট');
+  if(native){await nativeSchedule(S[i])}
+}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  const d=b.dataset;
+  if(d.h){setReset(+d.i,Date.now()+d.h*3600e3)}
+  else if(d.set!==undefined){
+    const i=+d.set,v=$('#tm'+i).value;
+    if(!v){toast('আগে সময় বাছাই করুন');return}
+    const [H,M]=v.split(':').map(Number);const t=new Date();t.setHours(H,M,0,0);
+    if(t.getTime()<=Date.now())t.setDate(t.getDate()+1);
+    setReset(i,t.getTime());
+  }
+  else if(d.clr!==undefined){
+    const i=+d.clr;S[i].resetAt=null;S[i].notified=true;save();render();
+    if(native)nativeCancel(S[i].id);
+  }
+  else if(d.cal!==undefined){exportIcs(+d.cal)}
+});
+document.addEventListener('change',e=>{
+  if(e.target.classList.contains('name')){
+    const i=+e.target.dataset.i;
+    S[i].name=e.target.value.trim()||('Account '+(i+1));save();
+    if(native&&S[i].resetAt&&S[i].resetAt>Date.now())nativeSchedule(S[i]);
+  }
+});
+
+function exportIcs(i){
+  const a=S[i];if(!a.resetAt)return;
+  const f=ms=>new Date(ms).toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//LimitBell//BN//EN','BEGIN:VEVENT',
+   'UID:limit-'+a.id+'-'+a.resetAt+'@limitbell','DTSTAMP:'+f(Date.now()),
+   'DTSTART:'+f(a.resetAt),'DTEND:'+f(a.resetAt+15*60e3),
+   'SUMMARY:Claude লিমিট রিসেট - '+a.name,'DESCRIPTION:কাজ আবার শুরু করুন',
+   'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:Claude limit reset','TRIGGER:PT0S','END:VALARM',
+   'END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const url=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));
+  const l=document.createElement('a');l.href=url;l.download='claude-limit-'+a.id+'.ics';document.body.appendChild(l);l.click();l.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+}
+
+function beep(){
+  try{const c=new (window.AudioContext||window.webkitAudioContext)();
+    [0,.3,.6].forEach(t=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=880;o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(.2,c.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+t+.25);o.start(c.currentTime+t);o.stop(c.currentTime+t+.25)});
+  }catch(e){}
+}
+function inAppAlert(body){
+  try{navigator.vibrate&&navigator.vibrate([300,150,300,150,300])}catch(e){}
+  beep();
+  $('#aP').textContent=body;$('#alert').classList.add('on');
+}
+async function webNotify(title,body){
+  if('Notification' in window&&Notification.permission==='granted'){
+    const opt={body,icon:'icon.svg',tag:'limit-'+title,requireInteraction:true,vibrate:[300,150,300]};
+    try{
+      const r=swReg||await navigator.serviceWorker?.ready;
+      if(r)await r.showNotification(title,opt);else new Notification(title,opt);
+    }catch(e){}
+  }
+}
+$('#aOk').onclick=()=>$('#alert').classList.remove('on');
+
+$('#btnNotif').onclick=async()=>{
+  if(native){const ok=await nativePerms();toast(ok?'নোটিফিকেশন চালু হয়েছে ✅':'পারমিশন দেওয়া হয়নি');refreshBtn();return}
+  if(!('Notification' in window)){toast('এই ব্রাউজারে নোটিফিকেশন সাপোর্ট নেই');return}
+  const p=await Notification.requestPermission();
+  toast(p==='granted'?'নোটিফিকেশন চালু হয়েছে ✅':'পারমিশন দেওয়া হয়নি');refreshBtn();
+};
+async function refreshBtn(){
+  const b=$('#btnNotif');let ok=false;
+  if(native&&LN){try{ok=(await LN.checkPermissions()).display==='granted'}catch(e){}}
+  else ok='Notification' in window&&Notification.permission==='granted';
+  if(ok){b.textContent='🔔 নোটিফিকেশন চালু';b.classList.remove('pri')}
+}
+$('#btnTest').onclick=async()=>{
+  if(native&&LN){
+    await nativePerms();
+    try{
+      await LN.schedule({notifications:[{id:99,title:'টেস্ট অ্যালার্ট',body:'এভাবেই লিমিট রিসেটের অ্যালার্ট আসবে।',schedule:{at:new Date(Date.now()+5000),allowWhileIdle:true},channelId:'limit'}]});
+      toast('৫ সেকেন্ডের মধ্যে নোটিফিকেশন আসবে');
+    }catch(e){toast('সমস্যা: '+(e.message||e))}
+  }else{inAppAlert('এভাবেই লিমিট রিসেটের অ্যালার্ট আসবে।');webNotify('টেস্ট অ্যালার্ট','এভাবেই লিমিট রিসেটের অ্যালার্ট আসবে।')}
+};
+
+function tick(){
+  const now=Date.now();let changed=false;
+  S.forEach((a,i)=>{
+    if(a.resetAt&&!a.notified&&a.resetAt<=now){
+      a.notified=true;changed=true;save();
+      inAppAlert(a.name+': লিমিট রিসেট হয়েছে। কাজ আবার শুরু করুন।');
+      if(!native)webNotify('✅ '+a.name+' রেডি','লিমিট রিসেট হয়েছে। কাজ আবার শুরু করুন।');
+    }
+    const t=document.querySelector('[data-t="'+i+'"]');
+    if(t&&a.resetAt&&a.resetAt>now)t.textContent=fmtLeft(a.resetAt-now);
+  });
+  if(changed)render();
+}
+setInterval(tick,1000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){render();tick()}});
+
+(async()=>{
+  render();
+  if(native){await nativeInit();await nativePerms();
+    // re-sync pending alarms in case the system cleared them
+    S.forEach(a=>{if(a.resetAt&&a.resetAt>Date.now())nativeSchedule(a)});
+  }
+  refreshBtn();tick();
+})();
+</script>
+</body>
+</html>
