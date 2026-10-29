@@ -2,5 +2,11 @@
   "appId": "com.limitbell.app",
   "appName": "Limit Bell",
   "webDir": "www",
-  "backgroundColor": "#1a1511"
+  "backgroundColor": "#1a1511",
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_limit",
+      "iconColor": "#D97757"
+    }
+  }
 }
