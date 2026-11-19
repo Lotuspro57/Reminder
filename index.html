@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0E1014" id="themeMeta">
+<title>Limit Bell</title>
+<style>
+:root{--bg:#0E1014;--sf:#171A21;--sf2:#1F232B;--ln:#2A2F39;--tx:#EEF0F4;--mu:#A0A7B4;--ac:#F08A5D;--acT:#1A0F0A;--ok:#7BE0A0;--okBg:#1E3B2A;--wt:#F2C25E;--wtBg:#3D3017;--wk:#5CC8D7;--wkBg:#14343A;--bad:#FF8A80;--nav:#12151A;color-scheme:dark}
+:root[data-theme=light]{--bg:#F4F5F7;--sf:#FFFFFF;--sf2:#EEF0F4;--ln:#DDE1E8;--tx:#14171C;--mu:#5B6370;--ac:#C2501F;--acT:#FFFFFF;--ok:#1E7A45;--okBg:#DDF3E5;--wt:#8A5A00;--wtBg:#FBEBC8;--wk:#0E6B78;--wkBg:#D5EEF2;--bad:#C0392B;--nav:#FFFFFF;color-scheme:light}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+button:active,.tap:active{opacity:.7}
+input{font:inherit;color:var(--tx)}
+#app{display:flex;flex-direction:column;height:100dvh;max-width:560px;margin-inline:auto}
+#view{flex:1;overflow-y:auto;padding:calc(env(safe-area-inset-top) + 20px) 16px 20px;display:flex;flex-direction:column;gap:16px}
+h1{margin:0;font-size:28px;font-weight:700;letter-spacing:-.01em}
+h2{margin:0;font-size:15px;font-weight:600}
+.cap{font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--mu);text-transform:uppercase}
+.mu{color:var(--mu)}
+.num{font-variant-numeric:tabular-nums}
+.row{display:flex;align-items:center;gap:10px}
+.between{justify-content:space-between}
+.sp{flex:1;min-width:0}
+
+/* nav */
+nav{display:flex;border-top:1px solid var(--ln);background:var(--nav);padding:6px 8px calc(env(safe-area-inset-bottom) + 8px)}
+nav button{flex:1;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:500;color:var(--mu)}
+nav button.on{color:var(--ac);font-weight:700}
+nav svg,.ic{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* cards */
+.card{background:var(--sf);border:1px solid var(--ln);border-radius:20px;padding:16px 18px}
+.acc{background:var(--sf);border:1px solid var(--ln);border-radius:18px;padding:12px 16px 14px;cursor:pointer;display:block;width:100%;text-align:left}
+.chip{flex:none;width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#0E1014}
+.pill{font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;background:var(--sf2);color:var(--mu)}
+.pill.wait{background:var(--wtBg);color:var(--wt)}
+.pill.ready{background:var(--okBg);color:var(--ok)}
+.pill.work{background:var(--wkBg);color:var(--wk)}
+.big{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.15}
+.hero .big{font-size:46px;line-height:1}
+.bar{height:6px;border-radius:3px;background:var(--ln);margin-top:10px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:3px}
+.btn{min-height:44px;padding:0 16px;border-radius:12px;background:var(--sf2);border:1px solid var(--ln);font-size:13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.pri{background:var(--ac);border-color:var(--ac);color:var(--acT)}
+.btn.big2{min-height:56px;width:100%;border-radius:16px;font-size:16px}
+.fab{width:48px;height:48px;border-radius:24px;background:var(--ac);color:var(--acT);display:flex;align-items:center;justify-content:center}
+.fab .ic{stroke-width:2.4}
+.seg{display:grid;gap:8px}
+.opt{min-height:48px;border-radius:14px;background:var(--sf2);border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600}
+.opt.on{background:var(--ac);border-color:var(--ac);color:var(--acT)}
+.who{min-height:84px;border-radius:16px;background:var(--sf);border:1px solid var(--ln);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px 4px;font-size:12px;font-weight:600}
+.who.on{border:2px solid var(--ac)}
+.list{background:var(--sf);border:1px solid var(--ln);border-radius:18px;padding:2px 14px}
+.li{display:flex;align-items:center;gap:12px;min-height:56px;border-bottom:1px solid var(--ln)}
+.li:last-child{border-bottom:0}
+.sub{display:block;font-size:13px;color:var(--mu);margin-top:2px}
+.tg{width:48px;height:28px;border-radius:14px;background:var(--ln);padding:3px;display:flex;align-items:center;flex:none}
+.tg i{width:22px;height:22px;border-radius:11px;background:var(--tx);display:block}
+.tg.on{background:var(--ac);justify-content:flex-end}
+.tg.on i{background:var(--acT)}
+.fchips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.fchip{flex:none;min-height:44px;padding:0 18px;border-radius:22px;background:var(--sf);border:1px solid var(--ln);font-size:14px;font-weight:600}
+.fchip.on{background:var(--ac);border-color:var(--ac);color:var(--acT)}
+.field{width:100%;min-height:52px;background:var(--sf);border:1px solid var(--ln);border-radius:14px;padding:0 14px;outline:none}
+.field:focus{border-color:var(--ac)}
+input[type=time].field{color-scheme:inherit}
+.name{background:transparent;border:0;outline:none;width:100%;min-height:44px;font-size:15px}
+.stat{font-size:26px;font-weight:700;line-height:1.1}
+.days{display:flex;align-items:flex-end;gap:6px;height:48px}
+.days div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%;font-size:11px;color:var(--mu)}
+.days i{display:block;width:100%;border-radius:4px;background:var(--ln)}
+.days i.today{background:var(--ac)}
+.srow{background:var(--sf);border:1px solid var(--ln);border-radius:16px;padding:12px 8px 12px 14px;display:flex;gap:12px;align-items:flex-start}
+.del{flex:none;width:44px;height:44px;margin:-8px 0;display:flex;align-items:center;justify-content:center;color:var(--mu);border-radius:12px}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+.note{font-size:12px;color:var(--mu);line-height:1.5;padding:0 4px}
+.empty{text-align:center;color:var(--mu);padding:32px 16px;line-height:1.6}
+.prev{background:var(--sf2);border:1px solid var(--ln);border-radius:18px;padding:14px 16px}
+.native .webonly{display:none}
+
+/* sheet */
+#sheet{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;z-index:30;max-width:560px;margin-inline:auto}
+#sheet.on{display:flex}
+#sheetBody{flex:1;overflow-y:auto;padding:calc(env(safe-area-inset-top) + 16px) 16px 16px;display:flex;flex-direction:column;gap:20px}
+#sheetFoot{padding:10px 16px calc(env(safe-area-inset-bottom) + 16px)}
+.back{width:48px;height:48px;border-radius:24px;background:var(--sf);border:1px solid var(--ln);display:flex;align-items:center;justify-content:center}
+
+.toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%);background:#000d;color:#fff;padding:10px 16px;border-radius:99px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;max-width:90%;text-align:center;z-index:50}
+.toast.on{opacity:1}
+#alert{position:fixed;inset:0;background:#000d;display:none;align-items:center;justify-content:center;padding:24px;z-index:60}
+#alert.on{display:flex}
+#alert div{background:var(--sf);border:2px solid var(--ok);border-radius:22px;padding:24px;text-align:center;max-width:340px;width:100%}
+#alert h2{font-size:18px;margin-bottom:6px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="view"></div>
+  <nav>
+    <button data-tab="acc"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M5 4 3 6M19 4l2 2"/></svg>Accounts</button>
+    <button data-tab="ses"><svg class="ic" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Sessions</button>
+    <button data-tab="set"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>Settings</button>
+  </nav>
+</div>
+
+<div id="sheet"><div id="sheetBody"></div><div id="sheetFoot"><button class="btn pri big2" data-savesheet>Start reminder</button></div></div>
+<div id="alert"><div><h2 id="aT">Limit reset</h2><p id="aP"></p><button class="btn pri" id="aOk">OK</button></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= setup ================= */
+const KEY='limitReminderV1', SKEY='limitBellSettings', LKEY='limitBellSessions';
+const COLORS=['#5CC8D7','#A99BFF','#FF8FB1','#B4DC6A'];
+const WINDOW=5*3600e3;
+const CAP=window.Capacitor;
+const native=!!(CAP&&CAP.isNativePlatform&&CAP.isNativePlatform());
+let LN=null,SO=null;
+if(native){
+  try{LN=(CAP.Plugins&&CAP.Plugins.LocalNotifications)||CAP.registerPlugin('LocalNotifications')}catch(e){}
+  try{SO=CAP.registerPlugin('SettingsOpener')}catch(e){}
+  document.body.classList.add('native');
+}
+const TONES=[{id:'default',n:'Default (system)'},{id:'chime',n:'Chime'},{id:'bell',n:'Bell'},{id:'beep',n:'Beep'},{id:'alarm',n:'Alarm (loud)'}];
+
+const $=s=>document.querySelector(s);
+const pad=n=>String(n).padStart(2,'0');
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+const fmtT=ms=>new Date(ms).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+const fmtLeft=ms=>{const s=Math.max(0,Math.floor(ms/1000));return pad(Math.floor(s/3600))+':'+pad(Math.floor(s%3600/60))+':'+pad(s%60)};
+const fmtDur=ms=>{const m=Math.max(0,Math.round(ms/60000));return Math.floor(m/60)+'h '+pad(m%60)+'m'};
+const dayKey=ms=>{const d=new Date(ms);return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate()};
+function load(k,def){try{const v=JSON.parse(localStorage.getItem(k));return v==null?def:v}catch(e){return def}}
+function put(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+
+let S=load(KEY,null);
+if(!Array.isArray(S)||S.length!==4)S=[1,2,3,4].map(i=>({id:i,name:'Account '+i,resetAt:null,notified:true,startedAt:null,hitAt:null}));
+let ST=Object.assign({theme:'dark',tone:'default',early:true,repeat:false,keepDays:90},load(SKEY,{}));
+let LOG=load(LKEY,[]);
+if(ST.keepDays>0){const cut=Date.now()-ST.keepDays*864e5;LOG=LOG.filter(s=>s.hitAt>=cut)}
+const saveS=()=>put(KEY,S), saveT=()=>put(SKEY,ST), saveL=()=>put(LKEY,LOG);
+
+let tab='acc', fil='all', sh=null, perm={};
+const channel=()=>'limit_'+ST.tone;
+
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),2800)}
+
+/* ================= theme ================= */
+function applyTheme(){
+  const dark=ST.theme==='dark'||(ST.theme==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.dataset.theme=dark?'dark':'light';
+  $('#themeMeta').content=dark?'#0E1014':'#F4F5F7';
+}
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme)}catch(e){}
+
+/* ================= account state ================= */
+function stateOf(a,now=Date.now()){
+  if(a.resetAt&&a.resetAt>now)return 'wait';
+  if(a.startedAt)return 'work';
+  if(a.resetAt)return 'ready';
+  return 'free';
+}
+const ORDER={wait:0,ready:1,work:2,free:3};
+function sortedIdx(now=Date.now()){
+  return S.map((a,i)=>i).sort((x,y)=>{
+    const sx=stateOf(S[x],now),sy=stateOf(S[y],now);
+    if(sx!==sy)return ORDER[sx]-ORDER[sy];
+    return sx==='wait'?S[x].resetAt-S[y].resetAt:x-y;
+  });
+}
+const chipHtml=i=>`<span class="chip" style="background:${COLORS[i]}">${i+1}</span>`;
+
+/* ================= native notifications ================= */
+let askedExact=false;
+async function nativeInit(){
+  if(!LN)return;
+  for(const t of TONES){
+    const o={id:'limit_'+t.id,name:'Limit reset - '+t.n,description:'Claude limit reset alerts',importance:5,visibility:1,vibration:true};
+    if(t.id!=='default')o.sound=t.id+'.wav';
+    try{await LN.createChannel(o)}catch(e){}
+  }
+}
+async function ensureReady(){
+  if(!LN){toast('Native plugin not found');return false}
+  try{
+    let p=await LN.checkPermissions();
+    if(p.display!=='granted')p=await LN.requestPermissions();
+    if(p.display!=='granted'){toast('Notification permission was not granted');return false}
+  }catch(e){toast('Permission error: '+(e.message||e));return false}
+  try{
+    const ex=await LN.checkExactNotificationSetting();
+    if(ex.exact_alarm!=='granted'&&!askedExact){askedExact=true;toast('Turn on "Alarms & reminders", then come back');await LN.changeExactNotificationSetting()}
+  }catch(e){}
+  return true;
+}
+async function pendingCount(){try{return (await LN.getPending()).notifications.length}catch(e){return -1}}
+async function nativeCancelAll(id){if(LN){try{await LN.cancel({notifications:[{id},{id:100+id},{id:200+id}]})}catch(e){}}}
+async function nativeSchedule(a,quiet){
+  if(!LN||!a.resetAt)return;
+  const now=Date.now(),list=[];
+  list.push({id:a.id,title:a.name+' is ready',body:'Limit reset. Time to get back to work.',schedule:{at:new Date(a.resetAt),allowWhileIdle:true},channelId:channel()});
+  if(ST.early&&a.resetAt-600e3>now+5000)list.push({id:100+a.id,title:a.name+' is almost ready',body:'Resets in 10 minutes.',schedule:{at:new Date(a.resetAt-600e3),allowWhileIdle:true},channelId:channel()});
+  if(ST.repeat)list.push({id:200+a.id,title:a.name+' is still waiting for you',body:'Limit reset 10 minutes ago.',schedule:{at:new Date(a.resetAt+600e3),allowWhileIdle:true},channelId:channel()});
+  try{
+    await nativeCancelAll(a.id);
+    await LN.schedule({notifications:list});
+    if(!quiet){const n=await pendingCount();toast(a.name+': alert set for '+fmtT(a.resetAt)+' ('+n+' scheduled)')}
+  }catch(e){toast('Scheduling error: '+(e.message||e))}
+}
+function rescheduleAll(){if(native)S.forEach(a=>{if(a.resetAt&&a.resetAt>Date.now())nativeSchedule(a,true)})}
+
+/* ================= sound / in-app alert ================= */
+function beep(){
+  try{const c=new (window.AudioContext||window.webkitAudioContext)();
+    [0,.3,.6].forEach(t=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=880;o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(.2,c.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+t+.25);o.start(c.currentTime+t);o.stop(c.currentTime+t+.25)});
+  }catch(e){}
+}
+function playTone(id){if(id==='default'){beep();return}try{new Audio('sounds/'+id+'.wav').play().catch(beep)}catch(e){beep()}}
+function inAppAlert(title,body){
+  try{navigator.vibrate&&navigator.vibrate([300,150,300,150,300])}catch(e){}
+  playTone(ST.tone);
+  $('#aT').textContent=title;$('#aP').textContent=body;$('#alert').classList.add('on');
+}
+$('#aOk').onclick=()=>$('#alert').classList.remove('on');
+
+/* ================= views ================= */
+function render(){
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  if(tab==='acc')renderAcc();else if(tab==='ses')renderSes();else renderSet();
+  $('#view').scrollTop=0;
+}
+
+function heroInfo(now){
+  const waits=S.filter(a=>stateOf(a,now)==='wait').sort((x,y)=>x.resetAt-y.resetAt);
+  if(waits.length)return{t:fmtLeft(waits[0].resetAt-now),s:waits[0].name+' resets at '+fmtT(waits[0].resetAt),id:waits[0].id};
+  const r=S.find(a=>stateOf(a,now)==='ready');
+  if(r)return{t:'Ready now',s:r.name+' is ready to use',id:null};
+  return{t:'All free',s:'Log a limit when an account runs out',id:null};
+}
+function cardParts(a,now){
+  const s=stateOf(a,now);
+  if(s==='wait'){const tot=Math.max(1,a.resetAt-(a.hitAt||a.resetAt-WINDOW));return{s,pill:'Waiting',time:fmtLeft(a.resetAt-now),sub:'Resets '+fmtT(a.resetAt),pct:Math.min(100,Math.max(0,100-(a.resetAt-now)/tot*100)),col:'var(--wt)',tc:'var(--tx)'}}
+  if(s==='work')return{s,pill:'Working',time:fmtLeft(now-a.startedAt),sub:'Started '+fmtT(a.startedAt),pct:Math.min(100,(now-a.startedAt)/WINDOW*100),col:'var(--wk)',tc:'var(--wk)'};
+  if(s==='ready')return{s,pill:'Ready',time:'Ready now',sub:'Reset at '+fmtT(a.resetAt),pct:100,col:'var(--ok)',tc:'var(--ok)'};
+  return{s,pill:'Free',time:'Not limited',sub:'Tap to log a limit',pct:0,col:'var(--ln)',tc:'var(--mu)'};
+}
+
+function renderAcc(){
+  const now=Date.now(),h=heroInfo(now);
+  const cnt={wait:0,ready:0,work:0,free:0};S.forEach(a=>cnt[stateOf(a,now)]++);
+  const pills=[];
+  if(cnt.wait)pills.push(`<span class="pill wait">${cnt.wait} waiting</span>`);
+  if(cnt.ready)pills.push(`<span class="pill ready">${cnt.ready} ready</span>`);
+  if(cnt.work)pills.push(`<span class="pill work">${cnt.work} working</span>`);
+  if(cnt.free)pills.push(`<span class="pill">${cnt.free} free</span>`);
+  $('#view').innerHTML=`
+  <div class="row between">
+    <div><div class="mu" style="font-size:13px">${new Date().toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'short'})}</div><h1>Limit Bell</h1></div>
+    <button class="fab" data-open="auto" aria-label="Log a limit"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  </div>
+  <div class="card hero" style="display:flex;flex-direction:column;gap:10px">
+    <div class="cap">Next ready</div>
+    <div class="big num" id="heroT">${h.t}</div>
+    <div id="heroS" style="font-size:14px;color:var(--mu)">${esc(h.s)}</div>
+    <div class="row" style="flex-wrap:wrap;padding-top:4px">${pills.join('')}</div>
+  </div>
+  <div class="row between"><h2>Accounts</h2><span class="mu" style="font-size:13px">Soonest first</span></div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+  ${sortedIdx(now).map(i=>{
+    const a=S[i],p=cardParts(a,now);
+    const act=p.s==='work'?`<button class="btn" data-open="${i}">Hit limit</button>`:(p.s==='ready'||p.s==='free')?`<button class="btn pri" data-start="${i}">Start session</button>`:'';
+    return `<div class="acc" data-open="${i}" role="button" tabindex="0" aria-label="${esc(a.name)}, ${p.pill}">
+      <div class="row">${chipHtml(i)}<span class="sp" style="font-weight:600">${esc(a.name)}</span><span class="pill ${p.s}">${p.pill}</span></div>
+      <div class="row between" style="margin-top:8px">
+        <div><div class="big num" data-t="${i}" style="color:${p.tc}">${p.time}</div><div class="mu" style="font-size:13px;margin-top:2px">${p.sub}</div></div>
+        ${act}
+      </div>
+      <div class="bar"><i data-b="${i}" style="width:${p.pct}%;background:${p.col}"></i></div>
+    </div>`}).join('')}
+  </div>`;
+}
+
+function weekStats(){
+  const from=Date.now()-7*864e5,rows=LOG.filter(s=>s.hitAt>=from);
+  const w=rows.filter(s=>s.startedAt).map(s=>s.hitAt-s.startedAt);
+  const waited=rows.reduce((t,s)=>t+Math.max(0,Math.min(s.resetAt,Date.now())-s.hitAt),0);
+  return{n:rows.length,avg:w.length?fmtDur(w.reduce((a,b)=>a+b,0)/w.length):'-',waited:fmtDur(waited)};
+}
+function renderSes(){
+  const st=weekStats(),now=new Date();
+  const days=[];for(let k=6;k>=0;k--){const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()-k);days.push({key:d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate(),n:d.toLocaleDateString('en-US',{weekday:'narrow'}),today:k===0,c:0})}
+  LOG.forEach(s=>{const d=days.find(x=>x.key===dayKey(s.hitAt));if(d)d.c++});
+  const mx=Math.max(1,...days.map(d=>d.c));
+  const rows=LOG.filter(s=>fil==='all'||s.acc===fil).sort((a,b)=>b.hitAt-a.hitAt);
+  const groups=[];
+  rows.forEach(s=>{
+    const k=dayKey(s.hitAt);let g=groups.find(x=>x.k===k);
+    if(!g){const diff=Math.round((new Date(now.getFullYear(),now.getMonth(),now.getDate())-new Date(new Date(s.hitAt).getFullYear(),new Date(s.hitAt).getMonth(),new Date(s.hitAt).getDate()))/864e5);
+      g={k,t:diff===0?'Today':diff===1?'Yesterday':new Date(s.hitAt).toLocaleDateString('en-US',{weekday:'long',day:'numeric',month:'short'}),rows:[]};groups.push(g)}
+    g.rows.push(s);
+  });
+  $('#view').innerHTML=`
+  <div class="row between"><h1>Sessions</h1><button class="btn" data-export><svg class="ic" style="width:18px;height:18px" viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>Copy CSV</button></div>
+  <div class="card" style="display:flex;flex-direction:column;gap:12px">
+    <div class="cap">Last 7 days, all accounts</div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+      <div><div class="stat">${st.n}</div><div class="mu" style="font-size:12px">Sessions</div></div>
+      <div><div class="stat">${st.avg}</div><div class="mu" style="font-size:12px">Avg. worked</div></div>
+      <div><div class="stat">${st.waited}</div><div class="mu" style="font-size:12px">Total waited</div></div>
+    </div>
+    <div class="days" aria-label="Sessions per day">${days.map(d=>`<div><i class="${d.today?'today':''}" style="height:${Math.max(4,d.c/mx*30)}px"></i>${d.n}</div>`).join('')}</div>
+  </div>
+  <div class="fchips">
+    <button class="fchip ${fil==='all'?'on':''}" data-fil="all">All</button>
+    ${S.map((a,i)=>`<button class="fchip ${fil===i?'on':''}" data-fil="${i}">${esc(a.name)}</button>`).join('')}
+  </div>
+  ${groups.length?groups.map(g=>`<section style="display:flex;flex-direction:column;gap:8px"><h2 class="mu" style="font-size:13px;margin-top:4px">${g.t}</h2>
+    ${g.rows.map(s=>{const a=S[s.acc]||{name:'Account '+(s.acc+1)};
+      const span=s.startedAt?fmtT(s.startedAt)+' to '+fmtT(s.hitAt)+', reset '+fmtT(s.resetAt):'Limit at '+fmtT(s.hitAt)+', reset '+fmtT(s.resetAt);
+      return `<div class="srow">${chipHtml(s.acc)}<div class="sp" style="display:flex;flex-direction:column;gap:3px">
+        <div class="row between"><b>${esc(a.name)}</b><span class="ok num" style="font-size:14px;font-weight:600">${s.startedAt?fmtDur(s.hitAt-s.startedAt):'-'}</span></div>
+        <div class="mu" style="font-size:13px">${span}</div>${s.note?`<div style="font-size:13px">${esc(s.note)}</div>`:''}</div>
+        <button class="del" data-del="${s.id}" aria-label="Delete session"><svg class="ic" style="width:18px;height:18px" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>`}).join('')}
+  </section>`).join(''):`<div class="empty">No sessions yet.<br>Log a limit and it will show up here.<br>Tap <b>Start session</b> on an account to also track how long you worked.</div>`}`;
+}
+
+function permRow(name,state,ok,btn){
+  return `<div class="li"><span class="sp">${name}<span class="sub ${ok===true?'ok':ok===false?'bad':''}">${state}</span></span><button class="btn ${ok===false?'pri':''}" data-perm="${btn}">${ok===false?'Fix':'Open'}</button></div>`;
+}
+function renderSet(){
+  const g=v=>v==='granted'?['Allowed',true]:v==null?['Checking...',null]:['Not allowed',false];
+  const [n1,o1]=g(perm.notif),[n2,o2]=g(perm.exact);
+  const bat=perm.bat==null?['Checking...',null]:perm.bat?['Unrestricted',true]:['Restricted: alarms may be late',false];
+  $('#view').innerHTML=`
+  <h1>Settings</h1>
+  <section><div class="cap" style="margin-bottom:8px">Account names</div>
+    <div class="list">${S.map((a,i)=>`<div class="li">${chipHtml(i)}<input class="name accname" data-i="${i}" value="${esc(a.name)}" maxlength="24" aria-label="Account ${i+1} name"></div>`).join('')}</div></section>
+  <section><div class="cap" style="margin-bottom:8px">Appearance</div>
+    <div class="card" style="padding:12px 14px"><div class="seg" style="grid-template-columns:repeat(3,1fr)">
+      ${[['dark','Dark'],['light','Light'],['system','System']].map(([k,l])=>`<button class="opt ${ST.theme===k?'on':''}" data-theme="${k}">${l}</button>`).join('')}</div></div></section>
+  <section><div class="cap" style="margin-bottom:8px">Alarm tone</div>
+    <div class="list">${TONES.map(t=>`<div class="li tap" data-tone="${t.id}" role="button" tabindex="0"><span class="tg ${ST.tone===t.id?'on':''}" style="width:24px;height:24px;border-radius:12px"><i style="width:10px;height:10px;border-radius:5px"></i></span><span class="sp">${t.n}</span><button class="btn" data-prev="${t.id}" aria-label="Play ${t.n}">Play</button></div>`).join('')}</div>
+    <div class="note" style="margin-top:6px">Changing the tone re-schedules your active alarms.${native?'':' Tones apply to the Android app.'}</div></section>
+  <section><div class="cap" style="margin-bottom:8px">Alerts</div>
+    <div class="list">
+      <div class="li"><span class="sp">Remind me early<span class="sub">10 minutes before reset</span></span><button class="tg ${ST.early?'on':''}" data-tog="early" aria-label="Remind me early"><i></i></button></div>
+      <div class="li"><span class="sp">Repeat if I miss it<span class="sub">Again 10 minutes after reset</span></span><button class="tg ${ST.repeat?'on':''}" data-tog="repeat" aria-label="Repeat if I miss it"><i></i></button></div>
+    </div></section>
+  <section><div class="cap" style="margin-bottom:8px">Phone permissions</div>
+    <div class="list">
+      ${permRow('Notifications',n1,o1,'notif')}
+      ${permRow('Alarms and reminders',n2,o2,'exact')}
+      ${permRow('Run in background',bat[0],bat[1],'battery')}
+      ${permRow('Autostart','Check on Xiaomi, Oppo, Vivo',null,'autostart')}
+      ${permRow('App info','All app settings',null,'app')}
+    </div>
+    <div class="row" style="flex-wrap:wrap;margin-top:10px"><button class="btn" data-test="5">Test alert (5s)</button><button class="btn" data-test="30">Closed-app test (30s)</button></div>
+    <div class="note" style="margin-top:8px">${native?'Each button opens that page in your phone settings. Alarms scheduled: <b id="pc">...</b>. If alarms do not ring with the app closed, set Battery to Unrestricted and do not force-stop the app.':'These buttons only work in the Android app.'}</div></section>
+  <section><div class="cap" style="margin-bottom:8px">Sessions data</div>
+    <div class="list">
+      <div class="li tap" data-keep role="button" tabindex="0"><span class="sp">Keep session history</span><span class="mu">${ST.keepDays?ST.keepDays+' days':'Forever'}</span></div>
+      <div class="li tap" data-export role="button" tabindex="0"><span class="sp">Copy sessions as CSV</span></div>
+      <div class="li tap bad" data-clear role="button" tabindex="0"><span class="sp">Clear all sessions</span></div>
+    </div></section>
+  <section><div class="cap" style="margin-bottom:8px">Alarms</div>
+    <button class="btn" data-resetall>Clear all running alarms</button></section>`;
+  if(native)pendingCount().then(n=>{const e=$('#pc');if(e)e.textContent=n})
+}
+async function refreshPerm(){
+  if(!native)return;
+  try{perm.notif=(await LN.checkPermissions()).display}catch(e){}
+  try{perm.exact=(await LN.checkExactNotificationSetting()).exact_alarm}catch(e){}
+  try{if(SO)perm.bat=(await SO.status()).batteryUnrestricted}catch(e){}
+  if(tab==='set'&&!document.activeElement?.classList.contains('accname')){const y=$('#view').scrollTop;renderSet();$('#view').scrollTop=y}
+}
+async function openPhone(t){
+  if(!SO){toast('Works in the Android app only (install the newest APK)');return}
+  try{
+    const r=await SO.open({target:t});
+    if(!r.opened)toast('Could not open settings here. Open them manually.');
+    else if(!r.direct)toast('No direct page on this phone, opening App info');
+  }catch(e){toast('Error: '+(e.message||e))}
+}
+
+/* ================= log sheet ================= */
+function openSheet(i){
+  const now=Date.now();
+  if(i==='auto'){const free=sortedIdx(now).find(k=>['free','ready','work'].includes(stateOf(S[k],now)));i=free==null?0:free}
+  sh={acc:i,h:3,time:'',note:'',early:ST.early,save:true};
+  renderSheet();$('#sheet').classList.add('on');
+}
+function closeSheet(){sh=null;$('#sheet').classList.remove('on')}
+function shTarget(){
+  if(sh.time){const [H,M]=sh.time.split(':').map(Number);const t=new Date();t.setHours(H,M,0,0);if(t.getTime()<=Date.now())t.setDate(t.getDate()+1);return t.getTime()}
+  return Date.now()+(sh.h||3)*3600e3;
+}
+function renderSheet(){
+  const a=S[sh.acc],now=Date.now(),s=stateOf(a,now),ms=shTarget();
+  const info=s==='work'?`<div class="note">Worked so far: <b>${fmtDur(now-a.startedAt)}</b></div>`:s==='wait'?`<div class="note">Currently waiting until ${fmtT(a.resetAt)}. Saving updates that reset time.</div>`:'';
+  $('#sheetBody').innerHTML=`
+  <div class="row"><button class="back" data-closesheet aria-label="Back"><svg class="ic" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><h1 style="font-size:24px">Log a limit</h1></div>
+  <section><h2 class="mu" style="font-size:14px;margin-bottom:10px">Which account hit its limit?</h2>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+    ${S.map((x,i)=>`<button class="who ${sh.acc===i?'on':''}" data-sacc="${i}">${chipHtml(i)}<span style="max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(x.name)}</span></button>`).join('')}</div>${info}</section>
+  <section><h2 class="mu" style="font-size:14px;margin-bottom:10px">Resumes in</h2>
+    <div class="seg" style="grid-template-columns:repeat(5,1fr)">${[1,2,3,4,5].map(h=>`<button class="opt ${!sh.time&&sh.h===h?'on':''}" style="min-height:52px;font-size:15px" data-sh="${h}">${h}h</button>`).join('')}</div>
+    <div class="row" style="margin-top:12px"><span class="mu sp" style="font-size:14px">Or pick the exact reset time</span><input class="field" style="width:150px;font-weight:700" type="time" id="shTime" value="${sh.time}" aria-label="Exact reset time"></div></section>
+  <section><h2 class="mu" style="font-size:14px;margin-bottom:10px">What were you working on? <span style="font-weight:400">(optional)</span></h2>
+    <input class="field" id="shNote" maxlength="60" placeholder="Audit notes, FSA revision, CV review" value="${esc(sh.note)}"></section>
+  <section class="list">
+    <div class="li"><span class="sp">Remind me 10 minutes early</span><button class="tg ${sh.early?'on':''}" data-stog="early" aria-label="Remind early"><i></i></button></div>
+    <div class="li"><span class="sp">Save this to Sessions</span><button class="tg ${sh.save?'on':''}" data-stog="save" aria-label="Save to sessions"><i></i></button></div>
+  </section>
+  <section class="prev"><div class="cap" style="margin-bottom:4px">Alert preview</div>
+    <div style="font-size:16px;font-weight:600">${esc(a.name)} is ready at ${fmtT(ms)}</div>
+    <div class="mu" style="font-size:13px;margin-top:2px">In ${fmtDur(ms-now)}.${native?' Phone alarm, works with the app closed.':''}</div></section>`;
+}
+async function saveSheet(){
+  const i=sh.acc,a=S[i],now=Date.now(),ms=shTarget(),s=stateOf(a,now);
+  if(native&&!(await ensureReady()))return;
+  const early=ST.early;ST.early=sh.early;
+  if(sh.save){
+    if(s==='wait'){
+      const last=LOG.filter(x=>x.acc===i).sort((p,q)=>q.hitAt-p.hitAt)[0];
+      if(last){last.resetAt=ms;if(sh.note)last.note=sh.note}
+    }else LOG.push({id:now,acc:i,startedAt:a.startedAt||null,hitAt:now,resetAt:ms,note:sh.note.trim()});
+    saveL();
+  }
+  if(s!=='wait')a.hitAt=now;
+  a.resetAt=ms;a.notified=false;a.startedAt=null;saveS();
+  if(native)await nativeSchedule(a);
+  ST.early=early;
+  closeSheet();render();
+  if(!native)toast(a.name+': alert at '+fmtT(ms));
+}
+function startSession(i){
+  const a=S[i];a.startedAt=Date.now();a.resetAt=null;a.notified=true;saveS();
+  if(native)nativeCancelAll(a.id);
+  render();toast(a.name+': session started');
+}
+
+/* ================= events ================= */
+document.addEventListener('click',async e=>{
+  const t=e.target.closest('[data-tab],[data-open],[data-start],[data-fil],[data-del],[data-theme],[data-tone],[data-prev],[data-tog],[data-keep],[data-export],[data-clear],[data-perm],[data-test],[data-resetall],[data-closesheet],[data-sacc],[data-sh],[data-stog],[data-savesheet]');
+  if(!t)return;
+  const d=t.dataset;
+  if(d.tab){tab=d.tab;render();if(tab==='set')refreshPerm();return}
+  if(d.start!==undefined){startSession(+d.start);return}
+  if(d.open!==undefined){openSheet(d.open==='auto'?'auto':+d.open);return}
+  if(d.closesheet!==undefined){closeSheet();return}
+  if(d.sacc!==undefined){sh.acc=+d.sacc;renderSheet();return}
+  if(d.sh!==undefined){sh.h=+d.sh;sh.time='';renderSheet();return}
+  if(d.stog){sh[d.stog]=!sh[d.stog];renderSheet();return}
+  if(d.savesheet!==undefined){saveSheet();return}
+  if(d.fil!==undefined){fil=d.fil==='all'?'all':+d.fil;renderSes();return}
+  if(d.del){if(confirm('Delete this session?')){LOG=LOG.filter(s=>String(s.id)!==d.del);saveL();renderSes()}return}
+  if(d.theme){ST.theme=d.theme;saveT();applyTheme();renderSet();return}
+  if(d.prev){playTone(d.prev);return}
+  if(d.tone){ST.tone=d.tone;saveT();renderSet();rescheduleAll();return}
+  if(d.tog){ST[d.tog]=!ST[d.tog];saveT();renderSet();rescheduleAll();return}
+  if(d.keep!==undefined){const o=[30,90,365,0];ST.keepDays=o[(o.indexOf(ST.keepDays)+1)%o.length];saveT();renderSet();return}
+  if(d.export!==undefined){exportCsv();return}
+  if(d.clear!==undefined){if(confirm('Clear all sessions?')){LOG=[];saveL();toast('Sessions cleared')}return}
+  if(d.perm){if(d.perm==='notif'||d.perm==='exact'){if(native&&LN&&perm.notif!=='granted')await ensureReady()}openPhone(d.perm);return}
+  if(d.test){
+    const sec=+d.test;
+    if(!native){inAppAlert('Test alert','This is how a limit reset alert will look.');return}
+    if(!(await ensureReady()))return;
+    try{
+      await LN.schedule({notifications:[{id:90+(sec%7),title:'Test alert',body:'This is how a limit reset alert will look.',schedule:{at:new Date(Date.now()+sec*1000),allowWhileIdle:true},channelId:channel()}]});
+      toast(sec===5?'Alert in 5 seconds':'Now close the app and wait 30 seconds');
+    }catch(err){toast('Error: '+(err.message||err))}
+    return;
+  }
+  if(d.resetall!==undefined){if(confirm('Cancel all running alarms?')){S.forEach(a=>{a.resetAt=null;a.notified=true;a.startedAt=null;nativeCancelAll(a.id)});saveS();toast('Alarms cleared')}return}
+});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[role=button]')){e.preventDefault();e.target.click()}});
+document.addEventListener('input',e=>{
+  if(e.target.id==='shNote'&&sh)sh.note=e.target.value;
+});
+document.addEventListener('change',e=>{
+  if(e.target.id==='shTime'&&sh){sh.time=e.target.value;renderSheet();return}
+  if(e.target.classList.contains('accname')){
+    const i=+e.target.dataset.i;
+    S[i].name=e.target.value.trim()||('Account '+(i+1));e.target.value=S[i].name;saveS();
+    if(native&&S[i].resetAt&&S[i].resetAt>Date.now())nativeSchedule(S[i],true);
+  }
+});
+
+function exportCsv(){
+  if(!LOG.length){toast('No sessions to export');return}
+  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const iso=ms=>ms?new Date(ms).toISOString():'';
+  const csv=['account,started,limit_hit,reset,worked_minutes,note'].concat(LOG.slice().sort((a,b)=>a.hitAt-b.hitAt).map(s=>[q((S[s.acc]||{}).name||'Account '+(s.acc+1)),iso(s.startedAt),iso(s.hitAt),iso(s.resetAt),s.startedAt?Math.round((s.hitAt-s.startedAt)/60000):'',q(s.note)].join(','))).join('\n');
+  const done=()=>toast('CSV copied. Paste it into a note or sheet.');
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(csv).then(done).catch(()=>fallbackDownload(csv));
+  else fallbackDownload(csv);
+}
+function fallbackDownload(csv){
+  try{const url=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));const l=document.createElement('a');l.href=url;l.download='limit-bell-sessions.csv';document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(url),4000)}catch(e){toast('Export failed')}
+}
+
+/* ================= clock ================= */
+function tick(){
+  const now=Date.now();let changed=false;
+  S.forEach((a,i)=>{
+    if(a.resetAt&&!a.notified&&a.resetAt<=now){
+      a.notified=true;changed=true;saveS();
+      inAppAlert(a.name+' is ready','Limit reset. Time to get back to work.');
+      if(native&&LN)LN.cancel({notifications:[{id:200+a.id}]}).catch(()=>{});
+    }
+  });
+  if(changed&&tab==='acc'&&!sh){renderAcc();return}
+  if(tab==='acc'&&!sh){
+    const h=heroInfo(now);const ht=$('#heroT'),hs=$('#heroS');
+    if(ht)ht.textContent=h.t;if(hs)hs.textContent=h.s;
+    S.forEach((a,i)=>{
+      const el=document.querySelector('[data-t="'+i+'"]');if(!el)return;
+      const p=cardParts(a,now);
+      if(p.s==='wait'||p.s==='work'){el.textContent=p.time;const b=document.querySelector('[data-b="'+i+'"]');if(b)b.style.width=p.pct+'%'}
+    });
+  }
+}
+setInterval(tick,1000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(tab==='acc'&&!sh)renderAcc();else if(tab==='set')refreshPerm();tick()}});
+
+(async()=>{
+  applyTheme();render();
+  if(native){await nativeInit();rescheduleAll();refreshPerm()}
+  tick();
+})();
+</script>
+</body>
+</html>
